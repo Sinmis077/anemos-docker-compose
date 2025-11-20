@@ -4,8 +4,11 @@ services:
     image: mysql:latest
     volumes:
       - mysql_data:/var/lib/mysql
-    env_file:
-      - .database.env
+    environment:
+        - MYSQL_ROOT_PASSWORD=y
+        - MYSQL_DATABASE=webstore-prod
+        - MYSQL_USER=owner
+        - MYSQL_PASSWORD=password
     ports:
       - '3307:3306'
     healthcheck:
@@ -17,12 +20,18 @@ services:
 
   api:
     container_name: api
-    image: localhost/ipanagi:anemosapilatest
+    image: ioannispanagi/anemos_api:master
     depends_on:
       database:
         condition: service_healthy
-    env_file:
-      - .api.env
+    environment:
+      - SERVER_PORT=8080
+      - SERVER_ADDRESS=0.0.0.0
+      - DATASOURCE_JDBC_URL=jdbc:mysql://mysql-db:3306/webstore-prod
+      - DATASOURCE_USERNAME=owner
+      - DATASOURCE_PASSWORD=password
+      - DEFAULT_UPLOAD_DIR=uploads/images/
+      - DEFAULT_ACCESS_SRC=http://localhost:8081/resources/images/
     ports:
       - '8081:8080'
     networks:
@@ -30,7 +39,7 @@ services:
 
   web:
     container_name: web
-    image: localhost/ipanagi:anemosweblatest
+    image: ioannispanagi/anemos_web_customer:main
     depends_on:
       api:
         condition: service_started
