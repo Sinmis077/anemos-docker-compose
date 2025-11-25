@@ -21,6 +21,8 @@ services:
   api:
     container_name: api
     image: ioannispanagi/anemos_api:master
+    volumes:
+        - api_data:/uploads/images
     depends_on:
       database:
         condition: service_healthy
@@ -30,6 +32,7 @@ services:
       - DATASOURCE_JDBC_URL=jdbc:mysql://mysql-db:3306/webstore-prod
       - DATASOURCE_USERNAME=owner
       - DATASOURCE_PASSWORD=password
+      - MAX_IMAGE_SIZE=1048576
       - DEFAULT_UPLOAD_DIR=uploads/images/
       - DEFAULT_ACCESS_SRC=http://localhost:8081/resources/images/
     ports:
@@ -43,6 +46,8 @@ services:
     depends_on:
       api:
         condition: service_started
+    environment:
+        - API_URL=http://localhost:8081/api
     ports:
       - '3000:3000'
     networks:
@@ -50,6 +55,7 @@ services:
 
 volumes:
   mysql_data:
+  api_data:
 
 networks:
   anemos_network:
